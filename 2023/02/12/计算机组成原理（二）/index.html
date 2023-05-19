@@ -1,0 +1,489 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="Vayne"><meta name="copyright" content="Vayne"><meta name="generator" content="Hexo 5.4.0"><meta name="theme" content="hexo-theme-yun"><title>计算机组成原理（二） | Yun</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/star-markdown-css@0.1.25/dist/yun/yun-markdown.min.css"><script src="//at.alicdn.com/t/font_1140697_dxory92pb0h.js" async></script><script src="https://cdn.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".post-content img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link rel="icon" href="/yun.svg"><link rel="mask-icon" href="/yun.svg" color="#0078E7"><link rel="alternate icon" href="/yun.ico"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="preload" href="/js/utils.js" as="script"><link rel="preload" href="/js/hexo-theme-yun.js" as="script"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><script id="yun-config">
+    const Yun = window.Yun || {};
+    window.CONFIG = {"hostname":"example.com","root":"/","title":["V","a","y","n","e"],"version":"1.6.2","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"搜索...","empty":"找不到您查询的内容: ${query}","hits":"找到 ${hits} 条结果","hits_time":"找到 ${hits} 条结果（用时 ${time} 毫秒）"},"anonymous_image":"https://cdn.jsdelivr.net/gh/YunYouJun/cdn/img/avatar/none.jpg","say":{"api":"https://v1.hitokoto.cn","hitokoto":true},"fireworks":{"colors":["102, 167, 221","62, 131, 225","33, 78, 194"]}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/utils.js"></script><script src="/js/hexo-theme-yun.js"></script><meta name="description" content="[TOC] 指令系统 指令格式指令   地址码  优化后得到三地址指令   扩展操作码    两种操作码 指令功能  总结操作类型了解即可  指令寻址复习一下数据存放   边界对齐存储  指令寻址  总结 数据寻址1 立即寻址  直接寻址  间接寻址  寄存器寻址  寄存器间接寻址  隐含寻址  总结 数据寻址2—偏移寻址基址寻址   变址寻址  相对寻址  例    堆栈寻址  总结 COSC和">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机组成原理（二）">
+<meta property="og:url" content="http://example.com/2023/02/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86%EF%BC%88%E4%BA%8C%EF%BC%89/index.html">
+<meta property="og:site_name" content="Yun">
+<meta property="og:description" content="[TOC] 指令系统 指令格式指令   地址码  优化后得到三地址指令   扩展操作码    两种操作码 指令功能  总结操作类型了解即可  指令寻址复习一下数据存放   边界对齐存储  指令寻址  总结 数据寻址1 立即寻址  直接寻址  间接寻址  寄存器寻址  寄存器间接寻址  隐含寻址  总结 数据寻址2—偏移寻址基址寻址   变址寻址  相对寻址  例    堆栈寻址  总结 COSC和">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121456999.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121458159.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121502892.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121505628.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121506886.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121510081.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121530055.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121531398.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121538642.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121539500.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121541047.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121542681.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302130150965.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302130153998.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302130155113.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302130159931.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302130200437.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302131442223.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302131451835.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302131453411.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302131456960.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302131458175.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302131459478.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302131500709.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302131500381.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302140245309.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302140248314.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302140249942.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302141526749.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302141555136.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302141557778.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302141558835.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302141607121.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302141609293.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302141806236.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302141807721.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302141610234.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302150305480.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302150308878.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302150314428.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302151706174.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302160201815.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302160208437.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302160220565.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302160222453.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302160222592.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302160223602.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161323460.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161332984.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161334892.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161343305.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161351872.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161353763.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161406165.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161409041.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161410449.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161421417.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161440334.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161449841.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161452803.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161453874.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161455841.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171559551.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171600368.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171600346.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171609146.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171610214.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171636299.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171638113.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171639369.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171640753.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171657804.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171657414.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171710409.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171725099.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171728208.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171739831.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171740992.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171742655.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171746770.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171747536.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171758932.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171809310.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171812000.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181401873.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181419131.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181434838.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181451568.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181457770.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181502949.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181506988.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181506928.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181511690.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181513362.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181519970.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181521136.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181523165.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181525687.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181526526.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302191447698.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302191447094.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302191454098.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302191456296.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302191500850.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302191505179.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302191506486.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302211445850.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302211446359.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302211445910.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302211446418.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302211455815.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302211456537.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302211459609.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302211504682.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302211945569.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302211950486.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302211959698.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302212003774.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302212003289.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302220200966.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302220229986.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302220235822.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302220238647.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302220238809.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302220239545.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302221640961.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302221648181.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302221650568.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302221651879.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302221657867.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302221658837.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302221701997.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302221702908.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302221706272.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302221707432.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302230226764.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302230227240.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302230229171.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302230235050.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302230237657.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302230238291.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302230240859.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302230241061.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302231544030.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302231547765.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302231550300.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302231623790.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302231625526.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302240201691.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302240158217.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302240203158.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241502975.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241506865.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241510127.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241512523.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241514099.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241516812.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241540081.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241543248.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241619919.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241630822.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241632588.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241633485.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302272344533.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302272350525.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302272351400.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302280008298.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302280010988.png">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2023/jpeg/35296416/1677577385339-c6afd358-b16e-42c6-a163-57bb69394497.jpeg">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282107789.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282108325.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282108824.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282110409.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282111962.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282111393.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282112436.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282112961.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282113188.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282114472.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282114193.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282115278.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282115844.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282116328.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282116780.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282116631.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282116516.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282126585.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282127042.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282129057.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282130584.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282130913.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282135959.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282136124.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282135823.png">
+<meta property="article:published_time" content="2023-02-12T06:54:17.000Z">
+<meta property="article:modified_time" content="2023-02-28T13:36:15.053Z">
+<meta property="article:author" content="Vayne">
+<meta property="article:tag" content="cs专业课">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121456999.png"><script src="/js/ui/mode.js"></script></head><body><script defer src="https://cdn.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="文章目录"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-list-ordered"></use></svg></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="站点概览"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-passport-line"></use></svg></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="Vayne"><img width="96" loading="lazy" src="/images/touxiang.jpg" alt="Vayne"></a><div class="site-author-name"><a href="/about/">Vayne</a></div><span class="site-name">Yun</span><sub class="site-subtitle"></sub><div class="site-desciption">Blog</div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="首页"><span class="site-state-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-home-4-line"></use></svg></span></a><div class="site-state-item"><a href="/archives/" title="归档"><span class="site-state-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-archive-line"></use></svg></span><span class="site-state-item-count">30</span></a></div><div class="site-state-item"><a href="/categories/" title="分类"><span class="site-state-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-folder-2-line"></use></svg></span><span class="site-state-item-count">6</span></a></div><div class="site-state-item"><a href="/tags/" title="标签"><span class="site-state-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-price-tag-3-line"></use></svg></span><span class="site-state-item-count">14</span></a></div><a class="site-state-item hty-icon-button" target="_blank" rel="noopener" href="https://yun.yunyoujun.cn" title="文档"><span class="site-state-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-settings-line"></use></svg></span></a></nav><hr style="margin-bottom:0.5rem"><div class="links-of-author"><a class="links-of-author-item hty-icon-button" rel="noopener" href="/atom.xml" title="RSS" target="_blank" style="color:orange"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-rss-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://qm.qq.com/cgi-bin/qm/qr?k=kZJzggTTCf4SpvEQ8lXWoi5ZjhAx0ILZ&amp;jump_from=webapi" title="QQ 群 1050458482" target="_blank" style="color:#12B7F5"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-qq-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://github.com/YunYouJun" title="GitHub" target="_blank" style="color:#6e5494"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-github-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://weibo.com/jizhideyunyoujun" title="微博" target="_blank" style="color:#E6162D"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-weibo-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://www.douban.com/people/yunyoujun/" title="豆瓣" target="_blank" style="color:#007722"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-douban-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://music.163.com/#/user/home?id=247102977" title="网易云音乐" target="_blank" style="color:#C20C0C"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-netease-cloud-music-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://www.zhihu.com/people/yunyoujun/" title="知乎" target="_blank" style="color:#0084FF"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-zhihu-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://space.bilibili.com/1579790" title="哔哩哔哩" target="_blank" style="color:#FF8EB3"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-bilibili-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://cdn.jsdelivr.net/gh/YunYouJun/cdn/img/about/white-qrcode-and-search.jpg" title="微信公众号" target="_blank" style="color:#1AAD19"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-wechat-2-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://twitter.com/YunYouJun" title="Twitter" target="_blank" style="color:#1da1f2"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-twitter-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://t.me/elpsycn" title="Telegram Channel" target="_blank" style="color:#0088CC"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-telegram-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="mailto:me@yunyoujun.cn" title="E-Mail" target="_blank" style="color:#8E71C1"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-mail-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://travellings.link" title="Travelling" target="_blank" style="color:var(--hty-text-color)"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-train-line"></use></svg></a></div><hr style="margin:0.5rem 1rem"><div class="links"><a class="links-item hty-icon-button" href="/links/" title="我的小伙伴们" style="color:dodgerblue"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-genderless-line"></use></svg></a></div><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-contrast-2-line"></use></svg></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8C%87%E4%BB%A4%E7%B3%BB%E7%BB%9F"><span class="toc-number">1.</span> <span class="toc-text">指令系统</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8C%87%E4%BB%A4%E6%A0%BC%E5%BC%8F"><span class="toc-number">1.1.</span> <span class="toc-text">指令格式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%A4%E7%A7%8D%E6%93%8D%E4%BD%9C%E7%A0%81"><span class="toc-number">1.1.1.</span> <span class="toc-text">两种操作码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">1.1.2.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8C%87%E4%BB%A4%E5%AF%BB%E5%9D%80"><span class="toc-number">1.2.</span> <span class="toc-text">指令寻址</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93-1"><span class="toc-number">1.2.1.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%AF%BB%E5%9D%801"><span class="toc-number">1.3.</span> <span class="toc-text">数据寻址1</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93-2"><span class="toc-number">1.3.1.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%AF%BB%E5%9D%802%E2%80%94%E5%81%8F%E7%A7%BB%E5%AF%BB%E5%9D%80"><span class="toc-number">1.4.</span> <span class="toc-text">数据寻址2—偏移寻址</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E5%9D%80%E5%AF%BB%E5%9D%80"><span class="toc-number">1.4.1.</span> <span class="toc-text">基址寻址</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%98%E5%9D%80%E5%AF%BB%E5%9D%80"><span class="toc-number">1.4.2.</span> <span class="toc-text">变址寻址</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%B8%E5%AF%B9%E5%AF%BB%E5%9D%80"><span class="toc-number">1.4.3.</span> <span class="toc-text">相对寻址</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A0%86%E6%A0%88%E5%AF%BB%E5%9D%80"><span class="toc-number">1.4.4.</span> <span class="toc-text">堆栈寻址</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93-3"><span class="toc-number">1.4.5.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#COSC%E5%92%8CRISC"><span class="toc-number">1.5.</span> <span class="toc-text">COSC和RISC</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93-4"><span class="toc-number">1.6.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%AD%E5%A4%AE%E5%A4%84%E7%90%86%E5%99%A8"><span class="toc-number">2.</span> <span class="toc-text">中央处理器</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#CPU%E5%8A%9F%E8%83%BD%E4%B8%8E%E7%BB%93%E6%9E%84"><span class="toc-number">2.1.</span> <span class="toc-text">CPU功能与结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%90%E7%AE%97%E5%99%A8ALU%E7%9A%84%E7%BB%93%E6%9E%84"><span class="toc-number">2.1.1.</span> <span class="toc-text">运算器ALU的结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A7%E5%88%B6%E5%99%A8%E7%9A%84%E7%BB%93%E6%9E%84"><span class="toc-number">2.1.2.</span> <span class="toc-text">控制器的结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93-5"><span class="toc-number">2.1.3.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8C%87%E4%BB%A4%E6%89%A7%E8%A1%8C%E8%BF%87%E7%A8%8B"><span class="toc-number">2.2.</span> <span class="toc-text">指令执行过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%87%E4%BB%A4%E5%91%A8%E6%9C%9F"><span class="toc-number">2.2.1.</span> <span class="toc-text">指令周期</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8C%87%E4%BB%A4%E5%91%A8%E6%9C%9F%E6%95%B0%E6%8D%AE%E6%B5%81"><span class="toc-number">2.2.1.1.</span> <span class="toc-text">指令周期数据流</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8C%87%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%96%B9%E6%A1%88"><span class="toc-number">2.2.1.2.</span> <span class="toc-text">指令执行方案</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%BB%E7%BB%93-6"><span class="toc-number">2.2.1.3.</span> <span class="toc-text">总结</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF%E7%9A%84%E5%8A%9F%E8%83%BD%E5%92%8C%E5%9F%BA%E6%9C%AC%E7%BB%93%E6%9E%84"><span class="toc-number">2.3.</span> <span class="toc-text">数据通路的功能和基本结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#CPU-%E5%86%85%E9%83%A8%E5%8D%95%E6%80%BB%E7%BA%BF"><span class="toc-number">2.3.1.</span> <span class="toc-text">CPU 内部单总线</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%BB%E7%BB%93-7"><span class="toc-number">2.3.1.1.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%93%E7%94%A8%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF"><span class="toc-number">2.3.2.</span> <span class="toc-text">专用数据通路</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%96%E6%8C%87%E5%91%A8%E6%9C%9F"><span class="toc-number">2.3.2.1.</span> <span class="toc-text">取指周期</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A7%E5%88%B6%E5%99%A8"><span class="toc-number">2.4.</span> <span class="toc-text">控制器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A1%AC%E5%B8%83%E7%BA%BF%EF%BC%88%E4%BA%86%E8%A7%A3%E5%8D%B3%E5%8F%AF%EF%BC%89"><span class="toc-number">2.4.1.</span> <span class="toc-text">硬布线（了解即可）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%BB%E7%BB%93-8"><span class="toc-number">2.4.1.1.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BE%AE%E7%A8%8B%E5%BA%8F%EF%BC%88%E9%87%8D%E7%82%B9%EF%BC%89"><span class="toc-number">2.4.2.</span> <span class="toc-text">微程序（重点）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%80%9D%E6%83%B3"><span class="toc-number">2.4.2.1.</span> <span class="toc-text">基本思想</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BE%AE%E6%8C%87%E4%BB%A4"><span class="toc-number">2.4.2.2.</span> <span class="toc-text">微指令</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-number">2.4.2.3.</span> <span class="toc-text">基本概念</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BE%AE%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%EF%BC%88%E4%BA%86%E8%A7%A3%E5%8D%B3%E5%8F%AF%EF%BC%89"><span class="toc-number">2.4.2.4.</span> <span class="toc-text">微程序设计（了解即可）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%8E%E7%A1%AC%E5%B8%83%E7%BA%BF%E7%9B%B8%E6%AF%94"><span class="toc-number">2.4.2.5.</span> <span class="toc-text">与硬布线相比</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%BB%E7%BB%93-9"><span class="toc-number">2.4.2.6.</span> <span class="toc-text">总结</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8C%87%E4%BB%A4%E6%B5%81%E6%B0%B4"><span class="toc-number">2.5.</span> <span class="toc-text">指令流水</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E5%BF%B5"><span class="toc-number">2.5.1.</span> <span class="toc-text">概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%A7%E8%83%BD%E6%8C%87%E6%A0%87"><span class="toc-number">2.5.2.</span> <span class="toc-text">性能指标</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93-10"><span class="toc-number">2.5.3.</span> <span class="toc-text">总结</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BA%BF"><span class="toc-number">3.</span> <span class="toc-text">总线</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5-1"><span class="toc-number">3.1.</span> <span class="toc-text">基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E6%80%BB%E7%BA%BF%E7%9A%84%E7%BB%93%E6%9E%84"><span class="toc-number">3.1.1.</span> <span class="toc-text">系统总线的结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93-11"><span class="toc-number">3.1.2.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%A7%E8%83%BD%E6%8C%87%E6%A0%87-1"><span class="toc-number">3.2.</span> <span class="toc-text">性能指标</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93-12"><span class="toc-number">3.2.1.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BA%BF%E4%BB%B2%E8%A3%81"><span class="toc-number">3.3.</span> <span class="toc-text">总线仲裁</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5-2"><span class="toc-number">3.3.1.</span> <span class="toc-text">基本概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9B%86%E4%B8%AD%E4%BB%B2%E8%A3%81"><span class="toc-number">3.3.2.</span> <span class="toc-text">集中仲裁</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%BB%E7%BB%93%EF%BC%88%E6%9C%AC%E5%B0%8F%E8%8A%82%E9%87%8D%E7%82%B9%EF%BC%89"><span class="toc-number">3.3.2.1.</span> <span class="toc-text">总结（本小节重点）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E5%B8%83%E4%BB%B2%E8%A3%81"><span class="toc-number">3.3.3.</span> <span class="toc-text">分布仲裁</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BA%BF%E6%93%8D%E4%BD%9C%E5%92%8C%E5%AE%9A%E6%97%B6"><span class="toc-number">3.4.</span> <span class="toc-text">总线操作和定时</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BA%BF%E5%AE%9A%E6%97%B6"><span class="toc-number">3.4.1.</span> <span class="toc-text">总线定时</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93-13"><span class="toc-number">3.4.2.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BA%BF%E6%A0%87%E5%87%86"><span class="toc-number">3.5.</span> <span class="toc-text">总线标准</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5-3"><span class="toc-number">3.5.1.</span> <span class="toc-text">基本概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ISA%E5%92%8CEISA"><span class="toc-number">3.5.2.</span> <span class="toc-text">ISA和EISA</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#PCI-AGP-PCI-E"><span class="toc-number">3.5.3.</span> <span class="toc-text">PCI AGP PCI-E</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#USB-RS-232C"><span class="toc-number">3.5.4.</span> <span class="toc-text">USB  RS-232C</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#IO%E7%B3%BB%E7%BB%9F"><span class="toc-number">4.</span> <span class="toc-text">IO系统</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5-4"><span class="toc-number">4.1.</span> <span class="toc-text">基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#IO%E6%96%B9%E5%BC%8F%E7%AE%80%E4%BB%8B"><span class="toc-number">4.1.1.</span> <span class="toc-text">IO方式简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93-14"><span class="toc-number">4.1.2.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#IO%E8%AE%BE%E5%A4%87"><span class="toc-number">4.2.</span> <span class="toc-text">IO设备</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BE%93%E5%87%BA%E8%AE%BE%E5%A4%87"><span class="toc-number">4.2.1.</span> <span class="toc-text">输出设备</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%96%E5%AD%98%E5%82%A8%E5%99%A8"><span class="toc-number">4.3.</span> <span class="toc-text">外存储器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A3%81%E7%9B%98%E5%AD%98%E5%82%A8%E5%99%A8"><span class="toc-number">4.3.1.</span> <span class="toc-text">磁盘存储器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93-15"><span class="toc-number">4.3.2.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#IO%E6%8E%A5%E5%8F%A3"><span class="toc-number">4.4.</span> <span class="toc-text">IO接口</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%9F%E8%83%BD%E5%8F%8A%E5%9F%BA%E6%9C%AC%E7%BB%93%E6%9E%84"><span class="toc-number">4.4.1.</span> <span class="toc-text">功能及基本结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A5%E5%8F%A3%E4%B8%8E%E7%AB%AF%E5%8F%A3"><span class="toc-number">4.4.2.</span> <span class="toc-text">接口与端口</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#IO%E6%96%B9%E5%BC%8F"><span class="toc-number">4.5.</span> <span class="toc-text">IO方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A8%8B%E5%BA%8F%E6%9F%A5%E8%AF%A2%E6%96%B9%E5%BC%8F"><span class="toc-number">4.5.1.</span> <span class="toc-text">程序查询方式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%BB%E7%BB%93-16"><span class="toc-number">4.5.1.1.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A8%8B%E5%BA%8F%E4%B8%AD%E6%96%AD%E6%96%B9%E5%BC%8F"><span class="toc-number">4.5.2.</span> <span class="toc-text">程序中断方式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5-5"><span class="toc-number">4.5.2.1.</span> <span class="toc-text">基本概念</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E8%AF%B7%E6%B1%82"><span class="toc-number">4.5.2.2.</span> <span class="toc-text">中断请求</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E5%88%A4%E4%BC%98"><span class="toc-number">4.5.2.3.</span> <span class="toc-text">中断判优</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E5%A4%84%E7%90%86"><span class="toc-number">4.5.2.4.</span> <span class="toc-text">中断处理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A8%8B%E5%BA%8F%E4%B8%AD%E6%96%AD%E6%96%B9%E5%BC%8F%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B%E5%8F%8ACPU%E5%8D%A0%E7%94%A8"><span class="toc-number">4.5.2.5.</span> <span class="toc-text">程序中断方式的工作流程及CPU占用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%BB%E7%BB%93-17"><span class="toc-number">4.5.2.6.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DMA%E6%96%B9%E5%BC%8F"><span class="toc-number">4.5.3.</span> <span class="toc-text">DMA方式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#DMA%E6%8E%A7%E5%88%B6%E5%99%A8"><span class="toc-number">4.5.3.1.</span> <span class="toc-text">DMA控制器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#DMA%E4%BC%A0%E9%80%81%E8%BF%87%E7%A8%8B"><span class="toc-number">4.5.3.2.</span> <span class="toc-text">DMA传送过程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#DMA%E4%BC%A0%E9%80%81%E6%96%B9%E5%BC%8F"><span class="toc-number">4.5.3.3.</span> <span class="toc-text">DMA传送方式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#DMA%E4%B8%8E%E4%B8%AD%E6%96%AD%E5%AF%B9%E6%AF%94"><span class="toc-number">4.5.3.4.</span> <span class="toc-text">DMA与中断对比</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%BB%E7%BB%93-18"><span class="toc-number">4.5.3.5.</span> <span class="toc-text">总结</span></a></li></ol></li></ol></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article"><link itemprop="mainEntityOfPage" href="http://example.com/2023/02/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86%EF%BC%88%E4%BA%8C%EF%BC%89/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="Vayne"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="Yun"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">计算机组成原理（二）</h1><div class="post-meta"><div class="post-time" style="display:inline-block"><span class="post-meta-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-calendar-line"></use></svg></span> <time title="创建时间：2023-02-12 14:54:17" itemprop="dateCreated datePublished" datetime="2023-02-12T14:54:17+08:00">2023-02-12</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-calendar-2-line"></use></svg></span> <time title="修改时间：2023-02-28 21:36:15" itemprop="dateModified" datetime="2023-02-28T21:36:15+08:00">2023-02-28</time></div><div class="post-classify"><span class="post-category"> <span class="post-meta-item-icon" style="margin-right:3px;"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-folder-line"></use></svg></span><span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/%E7%AC%94%E8%AE%B0/" style="--text-color:dimgray" itemprop="url" rel="index"><span itemprop="text">笔记</span></a></span></span><span class="post-tag"><span class="post-meta-divider">-</span><a class="tag-item" href="/tags/cs%E4%B8%93%E4%B8%9A%E8%AF%BE/" style="--text-color:var(--hty-text-color)"><span class="post-meta-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-price-tag-3-line"></use></svg></span><span class="tag-name">cs专业课</span></a></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body" style="--smc-primary:#0078E7;"><p>[TOC]</p>
+<h1 id="指令系统"><a href="#指令系统" class="headerlink" title="指令系统"></a>指令系统</h1><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121456999.png" alt="image-20230212145646857" loading="lazy"></p>
+<h2 id="指令格式"><a href="#指令格式" class="headerlink" title="指令格式"></a>指令格式</h2><p><strong>指令</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121458159.png" alt="image-20230212145839039" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121502892.png" alt="image-20230212150233781" loading="lazy"></p>
+<p><strong>地址码</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121505628.png" alt="image-20230212150527486" loading="lazy"></p>
+<p>优化后得到三地址指令</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121506886.png" alt="image-20230212150635722" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121510081.png" alt="image-20230212151002885" loading="lazy"></p>
+<p><strong>扩展操作码</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121530055.png" alt="image-20230212153052927" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121531398.png" alt="image-20230212153118322" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121538642.png" alt="image-20230212153821480" loading="lazy"></p>
+<h3 id="两种操作码"><a href="#两种操作码" class="headerlink" title="两种操作码"></a>两种操作码</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121539500.png" alt="image-20230212153950310" loading="lazy"></p>
+<p><strong>指令功能</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121541047.png" alt="image-20230212154136880" loading="lazy"></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>操作类型了解即可</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302121542681.png" alt="image-20230212154230563" loading="lazy"></p>
+<h2 id="指令寻址"><a href="#指令寻址" class="headerlink" title="指令寻址"></a>指令寻址</h2><p>复习一下<strong>数据存放</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302130150965.png" alt="image-20230213015018778" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302130153998.png" alt="image-20230213015323929" loading="lazy"></p>
+<p><strong>边界对齐存储</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302130155113.png" alt="image-20230213015557963" loading="lazy"></p>
+<p><strong>指令寻址</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302130159931.png" alt="image-20230213015907798" loading="lazy"></p>
+<h3 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302130200437.png" alt="image-20230213020000323" loading="lazy"></p>
+<h2 id="数据寻址1"><a href="#数据寻址1" class="headerlink" title="数据寻址1"></a>数据寻址1</h2><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302131442223.png" alt="image-20230213144208007" loading="lazy"></p>
+<p><strong>立即寻址</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302131451835.png" alt="image-20230213145120719" loading="lazy"></p>
+<p><strong>直接寻址</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302131453411.png" alt="image-20230213145328278" loading="lazy"></p>
+<p><strong>间接寻址</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302131456960.png" alt="image-20230213145618811" loading="lazy"></p>
+<p><strong>寄存器寻址</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302131458175.png" alt="image-20230213145824036" loading="lazy"></p>
+<p><strong>寄存器间接寻址</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302131459478.png" alt="image-20230213145920343" loading="lazy"></p>
+<p><strong>隐含寻址</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302131500709.png" alt="image-20230213150012615" loading="lazy"></p>
+<h3 id="总结-2"><a href="#总结-2" class="headerlink" title="总结"></a>总结</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302131500381.png" alt="image-20230213150040289" loading="lazy"></p>
+<h2 id="数据寻址2—偏移寻址"><a href="#数据寻址2—偏移寻址" class="headerlink" title="数据寻址2—偏移寻址"></a>数据寻址2—偏移寻址</h2><h3 id="基址寻址"><a href="#基址寻址" class="headerlink" title="基址寻址"></a>基址寻址</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302140245309.png" alt="image-20230214024515128" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302140248314.png" alt="image-20230214024826150" loading="lazy"> </p>
+<h3 id="变址寻址"><a href="#变址寻址" class="headerlink" title="变址寻址"></a>变址寻址</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302140249942.png" alt="image-20230214024932784" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302141526749.png" alt="image-20230214152617485" loading="lazy"></p>
+<h3 id="相对寻址"><a href="#相对寻址" class="headerlink" title="相对寻址"></a>相对寻址</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302141555136.png" alt="image-20230214155547998" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302141557778.png" alt="image-20230214155737657" loading="lazy"></p>
+<p><strong>例</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302141558835.png" alt="image-20230214155844760" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302141607121.png" alt="image-20230214160748006" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302141609293.png" alt="image-20230214160916225" loading="lazy"></p>
+<h3 id="堆栈寻址"><a href="#堆栈寻址" class="headerlink" title="堆栈寻址"></a>堆栈寻址</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302141806236.png" alt="image-20230214180657086" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302141807721.png" alt="image-20230214180728650" loading="lazy"></p>
+<h3 id="总结-3"><a href="#总结-3" class="headerlink" title="总结"></a>总结</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302141610234.png" alt="image-20230214161015113" loading="lazy"></p>
+<h2 id="COSC和RISC"><a href="#COSC和RISC" class="headerlink" title="COSC和RISC"></a>COSC和RISC</h2><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302150305480.png" alt="image-20230215030513270" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302150308878.png" alt="image-20230215030812754" loading="lazy"></p>
+<h2 id="总结-4"><a href="#总结-4" class="headerlink" title="总结"></a>总结</h2><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302150314428.png" alt="image-20230215031428291" loading="lazy"></p>
+<h1 id="中央处理器"><a href="#中央处理器" class="headerlink" title="中央处理器"></a>中央处理器</h1><h2 id="CPU功能与结构"><a href="#CPU功能与结构" class="headerlink" title="CPU功能与结构"></a>CPU功能与结构</h2><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302151706174.png" alt="image-20230215170625035" loading="lazy"></p>
+<h3 id="运算器ALU的结构"><a href="#运算器ALU的结构" class="headerlink" title="运算器ALU的结构"></a>运算器ALU的结构</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302160201815.png" alt="image-20230216020156613" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302160208437.png" alt="image-20230216020831238" loading="lazy"></p>
+<h3 id="控制器的结构"><a href="#控制器的结构" class="headerlink" title="控制器的结构"></a>控制器的结构</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302160220565.png" alt="image-20230216022028387" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302160222453.png" alt="image-20230216022203332" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302160222592.png" alt="image-20230216022218435" loading="lazy"></p>
+<h3 id="总结-5"><a href="#总结-5" class="headerlink" title="总结"></a>总结</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302160223602.png" alt="image-20230216022309444" loading="lazy"></p>
+<h2 id="指令执行过程"><a href="#指令执行过程" class="headerlink" title="指令执行过程"></a>指令执行过程</h2><h3 id="指令周期"><a href="#指令周期" class="headerlink" title="指令周期"></a>指令周期</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161323460.png" alt="image-20230216132351260" loading="lazy"></p>
+<p>为什么周期数可以不等</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161332984.png" alt="image-20230216133252857" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161334892.png" alt="image-20230216133439739" loading="lazy"></p>
+<h4 id="指令周期数据流"><a href="#指令周期数据流" class="headerlink" title="指令周期数据流"></a>指令周期数据流</h4><p><strong>取指周期</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161343305.png" alt="image-20230216134331176" loading="lazy"></p>
+<p><strong>间指周期</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161351872.png" alt="image-20230216135109749" loading="lazy"></p>
+<p><strong>执行周期</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161353763.png" alt="image-20230216135308710" loading="lazy"></p>
+<p><strong>中断周期</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161406165.png" alt="image-20230216140655001" loading="lazy"></p>
+<h4 id="指令执行方案"><a href="#指令执行方案" class="headerlink" title="指令执行方案"></a>指令执行方案</h4><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161409041.png" alt="image-20230216140924874" loading="lazy"></p>
+<h4 id="总结-6"><a href="#总结-6" class="headerlink" title="总结"></a>总结</h4><p>重点：指令周期，其他了解即可</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161410449.png" alt="image-20230216141018307" loading="lazy"></p>
+<h2 id="数据通路的功能和基本结构"><a href="#数据通路的功能和基本结构" class="headerlink" title="数据通路的功能和基本结构"></a>数据通路的功能和基本结构</h2><h3 id="CPU-内部单总线"><a href="#CPU-内部单总线" class="headerlink" title="CPU 内部单总线"></a>CPU 内部单总线</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161421417.png" alt="image-20230216142100241" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161440334.png" alt="image-20230216144049146" loading="lazy"></p>
+<p><strong>例题</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161449841.png" alt="image-20230216144951691" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161452803.png" alt="image-20230216145233739" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161453874.png" alt="image-20230216145329745" loading="lazy"></p>
+<h4 id="总结-7"><a href="#总结-7" class="headerlink" title="总结"></a>总结</h4><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302161455841.png" alt="image-20230216145521752" loading="lazy"></p>
+<h3 id="专用数据通路"><a href="#专用数据通路" class="headerlink" title="专用数据通路"></a>专用数据通路</h3><p>区别于CPU单总线bus</p>
+<h4 id="取指周期"><a href="#取指周期" class="headerlink" title="取指周期"></a>取指周期</h4><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171559551.png" alt="image-20230217155926445" loading="lazy"></p>
+<p><strong>例</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171600368.png" alt="image-20230217160030250" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171600346.png" alt="image-20230217160041286" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171609146.png" alt="image-20230217160937077" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171610214.png" alt="image-20230217161002165" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171636299.png" alt="image-20230217163659220" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171638113.png" alt="image-20230217163806058" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171639369.png" alt="image-20230217163918309" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171640753.png" alt="image-20230217164007695" loading="lazy"></p>
+<h2 id="控制器"><a href="#控制器" class="headerlink" title="控制器"></a>控制器</h2><p><strong>控制器的结构与功能</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171657804.png" alt="image-20230217165751617" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171657414.png" alt="image-20230217165702327" loading="lazy"></p>
+<p><strong>控制单元的输入输出</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171710409.png" alt="image-20230217171026173" loading="lazy"></p>
+<h3 id="硬布线（了解即可）"><a href="#硬布线（了解即可）" class="headerlink" title="硬布线（了解即可）"></a>硬布线（了解即可）</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171725099.png" alt="image-20230217172551928" loading="lazy"></p>
+<p><strong>CPU控制方式</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171728208.png" alt="image-20230217172857065" loading="lazy"></p>
+<p><strong>安排微操作时序</strong></p>
+<p>取指周期</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171739831.png" alt="image-20230217173910691" loading="lazy"></p>
+<p>间址周期</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171740992.png" alt="image-20230217174012937" loading="lazy"></p>
+<p>执行周期</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171742655.png" alt="image-20230217174235551" loading="lazy"></p>
+<p>中断周期</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171746770.png" alt="image-20230217174647650" loading="lazy"></p>
+<p><strong>组合逻辑设计</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171747536.png" alt="image-20230217174716479" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171758932.png" alt="image-20230217175846804" loading="lazy"></p>
+<p>综合</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171809310.png" alt="image-20230217180956187" loading="lazy"></p>
+<p>然后画逻辑图</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302171812000.png" alt="image-20230217181255853" loading="lazy"></p>
+<h4 id="总结-8"><a href="#总结-8" class="headerlink" title="总结"></a>总结</h4><p>了解即可</p>
+<h3 id="微程序（重点）"><a href="#微程序（重点）" class="headerlink" title="微程序（重点）"></a>微程序（重点）</h3><p>对比</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181401873.png" alt="image-20230218140100733" loading="lazy"></p>
+<h4 id="基本思想"><a href="#基本思想" class="headerlink" title="基本思想"></a>基本思想</h4><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181419131.png" alt="image-20230218141954926" loading="lazy"></p>
+<p><strong>微程序控制器</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181434838.png" alt="image-20230218143458650" loading="lazy"></p>
+<p><strong>控制存储器</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181451568.png" alt="image-20230218145117390" loading="lazy"></p>
+<h4 id="微指令"><a href="#微指令" class="headerlink" title="微指令"></a>微指令</h4><p><strong>格式</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181457770.png" alt="image-20230218145719599" loading="lazy"></p>
+<p><strong>编码方式</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181502949.png" alt="image-20230218150257765" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181506988.png" alt="image-20230218150601792" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181506928.png" alt="image-20230218150641780" loading="lazy"></p>
+<p><strong>微指令地址形成方式</strong></p>
+<p>重点为前两种</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181511690.png" alt="image-20230218151106548" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181513362.png" alt="image-20230218151348198" loading="lazy"></p>
+<h4 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h4><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181519970.png" alt="image-20230218151943781" loading="lazy"></p>
+<h4 id="微程序设计（了解即可）"><a href="#微程序设计（了解即可）" class="headerlink" title="微程序设计（了解即可）"></a>微程序设计（了解即可）</h4><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181521136.png" alt="image-20230218152119996" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181523165.png" alt="image-20230218152332028" loading="lazy"></p>
+<h4 id="与硬布线相比"><a href="#与硬布线相比" class="headerlink" title="与硬布线相比"></a>与硬布线相比</h4><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181525687.png" alt="image-20230218152533574" loading="lazy"></p>
+<h4 id="总结-9"><a href="#总结-9" class="headerlink" title="总结"></a>总结</h4><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302181526526.png" alt="image-20230218152616336" loading="lazy"></p>
+<h2 id="指令流水"><a href="#指令流水" class="headerlink" title="指令流水"></a>指令流水</h2><h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302191447698.png" alt="image-20230219144711521" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302191447094.png" alt="image-20230219144726877" loading="lazy"></p>
+<p><strong>流水线表示</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302191454098.png" alt="image-20230219145449952" loading="lazy"></p>
+<h3 id="性能指标"><a href="#性能指标" class="headerlink" title="性能指标"></a>性能指标</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302191456296.png" alt="image-20230219145659147" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302191500850.png" alt="image-20230219150037706" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302191505179.png" alt="image-20230219150528020" loading="lazy"></p>
+<h3 id="总结-10"><a href="#总结-10" class="headerlink" title="总结"></a>总结</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302191506486.png" alt="image-20230219150605375" loading="lazy"></p>
+<h1 id="总线"><a href="#总线" class="headerlink" title="总线"></a>总线</h1><h2 id="基本概念-1"><a href="#基本概念-1" class="headerlink" title="基本概念"></a>基本概念</h2><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302211445850.png" alt="image-20230221144453598" loading="lazy"></p>
+<p>分类</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302211446359.png" alt="image-20230221144652262" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302211445910.png" alt="image-20230221144528740" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302211446418.png" alt="image-20230221144642168" loading="lazy"></p>
+<h3 id="系统总线的结构"><a href="#系统总线的结构" class="headerlink" title="系统总线的结构"></a>系统总线的结构</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302211455815.png" alt="image-20230221145501659" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302211456537.png" alt="image-20230221145648365" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302211459609.png" alt="image-20230221145952448" loading="lazy"></p>
+<h3 id="总结-11"><a href="#总结-11" class="headerlink" title="总结"></a>总结</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302211504682.png" alt="image-20230221150427474" loading="lazy"></p>
+<h2 id="性能指标-1"><a href="#性能指标-1" class="headerlink" title="性能指标"></a>性能指标</h2><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302211945569.png" alt="image-20230221194543375" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302211950486.png" alt="image-20230221195040340" loading="lazy"></p>
+<p><strong>例题</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302211959698.png" alt="image-20230221195924413" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302212003774.png" alt="image-20230221200306542" loading="lazy"></p>
+<h3 id="总结-12"><a href="#总结-12" class="headerlink" title="总结"></a>总结</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302212003289.png" alt="image-20230221200323064" loading="lazy"></p>
+<h2 id="总线仲裁"><a href="#总线仲裁" class="headerlink" title="总线仲裁"></a>总线仲裁</h2><h3 id="基本概念-2"><a href="#基本概念-2" class="headerlink" title="基本概念"></a>基本概念</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302220200966.png" alt="image-20230222020022784" loading="lazy"></p>
+<h3 id="集中仲裁"><a href="#集中仲裁" class="headerlink" title="集中仲裁"></a>集中仲裁</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302220229986.png" alt="image-20230222022914796" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302220235822.png" alt="image-20230222023511565" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302220238647.png" alt="image-20230222023858450" loading="lazy"></p>
+<h4 id="总结（本小节重点）"><a href="#总结（本小节重点）" class="headerlink" title="总结（本小节重点）"></a>总结（本小节重点）</h4><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302220238809.png" alt="image-20230222023804685" loading="lazy"></p>
+<h3 id="分布仲裁"><a href="#分布仲裁" class="headerlink" title="分布仲裁"></a>分布仲裁</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302220239545.png" alt="image-20230222023932451" loading="lazy"></p>
+<h2 id="总线操作和定时"><a href="#总线操作和定时" class="headerlink" title="总线操作和定时"></a>总线操作和定时</h2><p><strong>总线传输四个阶段</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302221640961.png" alt="image-20230222164019790" loading="lazy"></p>
+<h3 id="总线定时"><a href="#总线定时" class="headerlink" title="总线定时"></a>总线定时</h3><p><strong>同步</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302221648181.png" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302221650568.png" alt="image-20230222165010409" loading="lazy"></p>
+<p><strong>异步</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302221651879.png" alt="image-20230222165106769" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302221657867.png" alt="image-20230222165740690" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302221658837.png" alt="image-20230222165826728" loading="lazy"></p>
+<p>例题</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302221701997.png" alt="image-20230222170121839" loading="lazy"></p>
+<p><strong>半同步和分离式通信</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302221702908.png" alt="image-20230222170242773" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302221706272.png" alt="image-20230222170648136" loading="lazy"></p>
+<h3 id="总结-13"><a href="#总结-13" class="headerlink" title="总结"></a>总结</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302221707432.png" alt="image-20230222170731294" loading="lazy"></p>
+<h2 id="总线标准"><a href="#总线标准" class="headerlink" title="总线标准"></a>总线标准</h2><h3 id="基本概念-3"><a href="#基本概念-3" class="headerlink" title="基本概念"></a>基本概念</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302230226764.png" alt="image-20230223022626580" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302230227240.png" alt="image-20230223022702939" loading="lazy"></p>
+<h3 id="ISA和EISA"><a href="#ISA和EISA" class="headerlink" title="ISA和EISA"></a>ISA和EISA</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302230229171.png" alt="image-20230223022918943" loading="lazy"></p>
+<h3 id="PCI-AGP-PCI-E"><a href="#PCI-AGP-PCI-E" class="headerlink" title="PCI AGP PCI-E"></a>PCI AGP PCI-E</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302230235050.png" alt="image-20230223023537786" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302230237657.png" alt="image-20230223023711419" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302230238291.png" alt="image-20230223023818082" loading="lazy"></p>
+<h3 id="USB-RS-232C"><a href="#USB-RS-232C" class="headerlink" title="USB  RS-232C"></a>USB  RS-232C</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302230240859.png" alt="image-20230223024006654" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302230241061.png" alt="image-20230223024135863" loading="lazy"></p>
+<h1 id="IO系统"><a href="#IO系统" class="headerlink" title="IO系统"></a>IO系统</h1><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302231544030.png" alt="image-20230223154402909" loading="lazy"></p>
+<h2 id="基本概念-4"><a href="#基本概念-4" class="headerlink" title="基本概念"></a>基本概念</h2><p><strong>演变</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302231547765.png" alt="image-20230223154725522" loading="lazy"></p>
+<p><strong>IO系统基本组成</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302231550300.png" alt="image-20230223155013130" loading="lazy"></p>
+<h3 id="IO方式简介"><a href="#IO方式简介" class="headerlink" title="IO方式简介"></a>IO方式简介</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302231623790.png" alt="image-20230223162315629" loading="lazy"></p>
+<h3 id="总结-14"><a href="#总结-14" class="headerlink" title="总结"></a>总结</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302231625526.png" alt="image-20230223162537368" loading="lazy"></p>
+<h2 id="IO设备"><a href="#IO设备" class="headerlink" title="IO设备"></a>IO设备</h2><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302240201691.png" alt="image-20230224020150612" loading="lazy"></p>
+<p><strong>外部设备概念</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302240158217.png" alt="image-20230224015854079" loading="lazy"></p>
+<h3 id="输出设备"><a href="#输出设备" class="headerlink" title="输出设备"></a>输出设备</h3><p><strong>显示器</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302240203158.png" alt="image-20230224020325989" loading="lazy"></p>
+<h2 id="外存储器"><a href="#外存储器" class="headerlink" title="外存储器"></a>外存储器</h2><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241502975.png" alt="image-20230224150250778" loading="lazy"></p>
+<h3 id="磁盘存储器"><a href="#磁盘存储器" class="headerlink" title="磁盘存储器"></a>磁盘存储器</h3><p><strong>组成</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241506865.png" alt="image-20230224150636674" loading="lazy"></p>
+<p><strong>性能指标</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241510127.png" alt="image-20230224151042934" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241512523.png" alt="image-20230224151220394" loading="lazy"></p>
+<p><strong>磁盘阵列</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241514099.png" alt="image-20230224151415897" loading="lazy"></p>
+<h3 id="总结-15"><a href="#总结-15" class="headerlink" title="总结"></a>总结</h3><p>重点为划线部分</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241516812.png" alt="image-20230224151613648" loading="lazy"></p>
+<h2 id="IO接口"><a href="#IO接口" class="headerlink" title="IO接口"></a>IO接口</h2><h3 id="功能及基本结构"><a href="#功能及基本结构" class="headerlink" title="功能及基本结构"></a>功能及基本结构</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241540081.png" alt="image-20230224154055960" loading="lazy"></p>
+<p><strong>基本结构</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241543248.png" alt="image-20230224154349007" loading="lazy"></p>
+<h3 id="接口与端口"><a href="#接口与端口" class="headerlink" title="接口与端口"></a>接口与端口</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241619919.png" alt="image-20230224161944807" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241630822.png" alt="image-20230224163018577" loading="lazy"></p>
+<p><strong>IO接口类型</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241632588.png" alt="image-20230224163229460" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302241633485.png" alt="image-20230224163326312" loading="lazy"></p>
+<h2 id="IO方式"><a href="#IO方式" class="headerlink" title="IO方式"></a>IO方式</h2><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302272344533.png" alt="image-20230227234410312" loading="lazy"></p>
+<h3 id="程序查询方式"><a href="#程序查询方式" class="headerlink" title="程序查询方式"></a>程序查询方式</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302272350525.png" alt="image-20230227235018361" loading="lazy"></p>
+<p>结构</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302272351400.png" alt="image-20230227235155271" loading="lazy"></p>
+<p><strong>例题</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302280008298.png" alt="image-20230228000859116" loading="lazy"></p>
+<h4 id="总结-16"><a href="#总结-16" class="headerlink" title="总结"></a>总结</h4><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302280010988.png" alt="image-20230228001044851" loading="lazy"></p>
+<h3 id="程序中断方式"><a href="#程序中断方式" class="headerlink" title="程序中断方式"></a>程序中断方式</h3><p>总览</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2023/jpeg/35296416/1677577385339-c6afd358-b16e-42c6-a163-57bb69394497.jpeg" alt="img" loading="lazy"></p>
+<h4 id="基本概念-5"><a href="#基本概念-5" class="headerlink" title="基本概念"></a>基本概念</h4><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282107789.png" alt="image-20230228210739676" loading="lazy"></p>
+<h4 id="中断请求"><a href="#中断请求" class="headerlink" title="中断请求"></a>中断请求</h4><p>分类</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282108325.png" alt="image-20230228210818205" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282108824.png" alt="image-20230228210857710" loading="lazy"></p>
+<p>标记</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282110409.png" alt="image-20230228211053296" loading="lazy"></p>
+<h4 id="中断判优"><a href="#中断判优" class="headerlink" title="中断判优"></a>中断判优</h4><p>实现</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282111962.png" alt="image-20230228211117861" loading="lazy"></p>
+<p>优先级设置</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282111393.png" alt="image-20230228211135266" loading="lazy"></p>
+<h4 id="中断处理"><a href="#中断处理" class="headerlink" title="中断处理"></a>中断处理</h4><p>过程</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282112436.png" alt="image-20230228211210345" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282112961.png" alt="image-20230228211254860" loading="lazy"></p>
+<p>硬件向量法（了解即可）</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282113188.png" alt="image-20230228211326052" loading="lazy"></p>
+<p><strong>单重中断与多重中断</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282114472.png" alt="image-20230228211425374" loading="lazy"></p>
+<p>中断屏蔽技术（电路可以不掌握）</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282114193.png" alt="image-20230228211449078" loading="lazy"></p>
+<p>例题</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282115278.png" alt="image-20230228211512177" loading="lazy"></p>
+<h4 id="程序中断方式的工作流程及CPU占用"><a href="#程序中断方式的工作流程及CPU占用" class="headerlink" title="程序中断方式的工作流程及CPU占用"></a>程序中断方式的工作流程及CPU占用</h4><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282115844.png" alt="image-20230228211540734" loading="lazy"></p>
+<p><strong>例题</strong></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282116328.png" alt="image-20230228211603246" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282116780.png" alt="image-20230228211633649" loading="lazy"></p>
+<h4 id="总结-17"><a href="#总结-17" class="headerlink" title="总结"></a>总结</h4><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282116631.png" alt="image-20230228211643524" loading="lazy"></p>
+<h3 id="DMA方式"><a href="#DMA方式" class="headerlink" title="DMA方式"></a>DMA方式</h3><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282116516.png" alt="image-20230228211659441" loading="lazy"></p>
+<h4 id="DMA控制器"><a href="#DMA控制器" class="headerlink" title="DMA控制器"></a>DMA控制器</h4><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282126585.png" alt="image-20230228212635476" loading="lazy"></p>
+<h4 id="DMA传送过程"><a href="#DMA传送过程" class="headerlink" title="DMA传送过程"></a>DMA传送过程</h4><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282127042.png" alt="image-20230228212701922" loading="lazy"></p>
+<h4 id="DMA传送方式"><a href="#DMA传送方式" class="headerlink" title="DMA传送方式"></a>DMA传送方式</h4><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282129057.png" alt="image-20230228212958937" loading="lazy"></p>
+<p>特点</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282130584.png" alt="image-20230228213032468" loading="lazy"></p>
+<h4 id="DMA与中断对比"><a href="#DMA与中断对比" class="headerlink" title="DMA与中断对比"></a>DMA与中断对比</h4><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282130913.png" alt="image-20230228213046823" loading="lazy"></p>
+<p>例题</p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282135959.png" alt="image-20230228213502817" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282136124.png" alt="image-20230228213600005" loading="lazy"></p>
+<h4 id="总结-18"><a href="#总结-18" class="headerlink" title="总结"></a>总结</h4><p><img src="https://raw.githubusercontent.com/Vayn3/image/main/img/202302282135823.png" loading="lazy"></p>
+</div><div id="reward-container"><span class="hty-icon-button button-glow" id="reward-button" title="打赏" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === &quot;none&quot;) ? &quot;block&quot; : &quot;none&quot;;"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-hand-coin-line"></use></svg></span><div id="reward-comment">I'm so cute. Please give me money.</div><div id="qr" style="display:none;"><div style="display:inline-block"><a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/YunYouJun/cdn/img/donate/alipay-qrcode.jpg"><img loading="lazy" src="https://cdn.jsdelivr.net/gh/YunYouJun/cdn/img/donate/alipay-qrcode.jpg" alt="支付宝" title="支付宝"></a><div><span style="color:#00A3EE"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-alipay-line"></use></svg></span></div></div><div style="display:inline-block"><a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/YunYouJun/cdn/img/donate/qqpay-qrcode.png"><img loading="lazy" src="https://cdn.jsdelivr.net/gh/YunYouJun/cdn/img/donate/qqpay-qrcode.png" alt="QQ 支付" title="QQ 支付"></a><div><span style="color:#12B7F5"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-qq-line"></use></svg></span></div></div><div style="display:inline-block"><a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/YunYouJun/cdn/img/donate/wechatpay-qrcode.jpg"><img loading="lazy" src="https://cdn.jsdelivr.net/gh/YunYouJun/cdn/img/donate/wechatpay-qrcode.jpg" alt="微信支付" title="微信支付"></a><div><span style="color:#2DC100"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-wechat-pay-line"></use></svg></span></div></div></div></div><ul class="post-copyright"><li class="post-copyright-author"><strong>本文作者：</strong>Vayne</li><li class="post-copyright-link"><strong>本文链接：</strong><a href="http://example.com/2023/02/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86%EF%BC%88%E4%BA%8C%EF%BC%89/" title="计算机组成原理（二）">http://example.com/2023/02/12/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86%EF%BC%88%E4%BA%8C%EF%BC%89/</a></li><li class="post-copyright-license"><strong>版权声明：</strong>本博客所有文章除特别声明外，均默认采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><svg class="icon"><use xlink:href="#icon-creative-commons-line"></use></svg><svg class="icon"><use xlink:href="#icon-creative-commons-by-line"></use></svg><svg class="icon"><use xlink:href="#icon-creative-commons-nc-line"></use></svg><svg class="icon"><use xlink:href="#icon-creative-commons-sa-line"></use></svg></a> 许可协议。</li></ul></section></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2023/02/13/%E7%AE%97%E6%B3%95%E5%88%B7%E9%A2%98/" rel="prev" title="算法刷题"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-arrow-left-s-line"></use></svg><span class="post-nav-text">算法刷题</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2023/02/04/%E8%AE%A1%E7%BD%91%EF%BC%88%E4%B8%80%EF%BC%89/" rel="next" title="计网（一）"><span class="post-nav-text">计网（一）</span><svg class="icon" aria-hidden="true"><use xlink:href="#icon-arrow-right-s-line"></use></svg></a></div></div></div><div class="hty-card" id="comment"><div class="comment-tooltip text-center"><span>要不要和我说些什么？</span><br></div></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-cloud-line"></use></svg></span><span class="author"> Vayne</span></div><div class="powered"><span>由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 v5.4.0</span><span class="footer-separator">|</span><span>主题 - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.6.2</span></div></footer><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-arrow-up-s-line"></use></svg><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a></div></body></html>
